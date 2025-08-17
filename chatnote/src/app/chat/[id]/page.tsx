@@ -2,15 +2,20 @@
 import { useEffect, useState } from "react";
 import MessageList, { ChatMessage } from "@/components/MessageList";
 import ChatInput from "@/components/ChatInput";
-
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 export default function ChatDetail({ params }: { params: { id: string } }) {
     const threadId = params.id;
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
     useEffect(() => {
-        fetch(`/api/messages?threadId=${threadId}`).then(r=>r.json()).then((rows)=> {
-            setMessages(rows.map((r:any)=>({ id: r.id, role: r.role, content: r.content })));
-        });
+        const session = getServerSession(); // v4 でも app router なら可
+        // TODO; ちゃんと制御できない
+        if (!session) {redirect("/api/auth/signin?callbackUrl=/chat")} else {
+            fetch(`/api/messages?threadId=${threadId}`).then(r=>r.json()).then((rows)=> {
+                setMessages(rows.map((r:any)=>({ id: r.id, role: r.role, content: r.content })));
+            });
+        }
     }, [threadId]);
 
     async function send(text: string) {
@@ -30,6 +35,7 @@ export default function ChatDetail({ params }: { params: { id: string } }) {
     }
 
     return (
+
         <main className="mx-auto flex h-dvh max-w-3xl flex-col gap-4 p-4">
             <div className="flex-1 rounded-2xl border p-4">
                 <MessageList messages={messages} />
