@@ -1,39 +1,38 @@
 "use client";
-import { useState } from "react";
-import MessageList, { ChatMessage } from "./components/MessageList";
-import ChatInput from "./components/ChatInput";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+type Thread = { id: string; title: string; _count?: { messages: number } };
 
 export default function Home() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: crypto.randomUUID(), role: "assistant", content: "Hi! なんでも聞いてね。" },
-  ]);
+    const [threads, setThreads] = useState<Thread[]>([]);
+    const [title, setTitle] = useState("");
 
-  async function send(text: string) {
-    // 楽観的にユーザー発言を表示
-    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: "user", content: text };
-    setMessages(prev => [...prev, userMsg]);
+    useEffect(() => { fetch("/api/chats").then(r => r.json()).then(setThreads); }, []);
 
-    // Bot（エコー）呼び出し
-    const res = await fetch("/api/bot", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: text }),
-    });
-    const bot = (await res.json()) as { role: "assistant"; content: string };
-    setMessages(prev => [...prev, { id: crypto.randomUUID(), ...bot }]);
-  }
+    async function addThread(e: React.FormEvent) {
+        e.preventDefault();
+        const res = await fetch("/api/chats", { method: "POST", headers: { "Content-Type":"application/json" }, body: JSON.stringify({ title }) });
+        const th = await res.json();
+        setThreads(prev => [th, ...prev]); setTitle("");
+    }
 
-  return (
-      <main className="mx-auto flex h-dvh max-w-3xl flex-col gap-4 p-4">
-        <header className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">ChatNote – Minimal</h1>
-        </header>
-
-        <div className="flex-1 rounded-2xl border p-4">
-          <MessageList messages={messages} />
-        </div>
-
-        <ChatInput onSend={send} />
-      </main>
-  );
+    return (
+        <main className="mx-auto max-w-3xl p-6 space-y-6">
+            <h1 className="text-2xl font-bold">ChatNote</h1>
+            <form onSubmit={addThread} className="flex gap-2">
+                <input className="flex-1 rounded-xl border p-2" value={title} onChange={e => setTitle(e.target.value)}
+                       placeholder="New thread title" required/>
+                <button className="rounded-xl bg-black px-4 py-2 text-white">Add</button>
+            </form>
+            <ul className="space-y-2">
+                {threads.map(t => (
+                    <li key={t.id} className="rounded-xl border p-3 hover:bg-gray-50">
+                        <Link href={`/chat/${t.id}`} className="font-medium underline">{t.title}</Link>
+                        <span className="ml-2 text-sm text-gray-500">{t._count?.messages ?? 0} msgs</span>
+                    </li>
+                ))}
+            </ul>
+        </main>
+    );
 }
