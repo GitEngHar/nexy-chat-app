@@ -4,14 +4,15 @@ import MessageList, { ChatMessage } from "@/components/MessageList";
 import ChatInput from "@/components/ChatInput";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import {useSession} from "next-auth/react";
 export default function ChatDetail({ params }: { params: { id: string } }) {
     const threadId = params.id;
     const [messages, setMessages] = useState<ChatMessage[]>([]);
-
+    const { data } = useSession();
+    const authed = !!data?.user;
     useEffect(() => {
-        const session = getServerSession(); // v4 でも app router なら可
         // TODO; ちゃんと制御できない
-        if (!session) {redirect("/api/auth/signin?callbackUrl=/chat")} else {
+        if (!authed) {redirect("/api/auth/signin?callbackUrl=/chat")} else {
             fetch(`/api/messages?threadId=${threadId}`).then(r=>r.json()).then((rows)=> {
                 setMessages(rows.map((r:any)=>({ id: r.id, role: r.role, content: r.content })));
             });
