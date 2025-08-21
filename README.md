@@ -1,6 +1,9 @@
 ChatNote — Next.js + Prisma AI Chat
 ===================================
 
+![chat](https://github.com/user-attachments/assets/de18d48f-6eba-4363-965b-ca485c3d4653)
+
+
 ChatNote is a minimal chat app built with the Next.js App Router, Prisma (SQLite), and NextAuth (Google). It supports creating chat threads, persisting messages, and generating AI replies using OpenAI. Without an API key, the AI route gracefully falls back to an echo response for local development.
 
 Features
