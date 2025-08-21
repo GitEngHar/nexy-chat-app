@@ -26,7 +26,7 @@ export default function ChatDetail({ params }: { params: { id: string } }) {
         await fetch("/api/messages", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ threadId, role:"user", content:text }) });
 
         // 2) Bot呼び出し
-        const botRes = await fetch("/api/bot", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ content: text }) });
+        const botRes = await fetch("/api/ai", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ threadId, content: text }) });
         const bot = await botRes.json(); // { role, content }
 
         // 3) Bot発言を保存＆表示

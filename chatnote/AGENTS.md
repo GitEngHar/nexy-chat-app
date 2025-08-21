@@ -35,6 +35,16 @@
 - Database: Local dev uses SQLite at `prisma/dev.db`. Regenerate client after schema edits.
 
 ## Architecture Overview
-- Next.js App Router with server and client components.
+- Next.js App Router with server and client components. 
 - API routes under `src/app/api/*` for threads, messages, and bot echo.
 - Data layer: Prisma models `ChatThread` and `Message` with relational access.
+
+## AI Chat Feature
+- src/app/api/ai/route.ts handles AI responses.
+- It calls the LLM API using OPENAI_API_KEY (or other backends).
+- The client UI (ChatInput, MessageList) renders user + AI messages in real time.
+
+## Future Extensions (for codex):
+
+- Add memory per chat thread (store conversation history in DB).
+- Enable streaming responses (Server-Sent Events / WebSocket).
